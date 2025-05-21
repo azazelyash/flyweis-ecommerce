@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -5,10 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:mr_pritam_client_app/NavBaarController/cart_screen.dart';
 import 'package:mr_pritam_client_app/common/notify_toast.dart';
 import 'package:mr_pritam_client_app/controllers/auth_controller.dart';
 import 'package:mr_pritam_client_app/models/banner_data_model.dart';
 import 'package:mr_pritam_client_app/models/job_data_model.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'notification.dart';
 
@@ -33,9 +37,8 @@ class HomeScreen extends HookConsumerWidget {
       }
     }
 
-    useEffect(() {
+    useMemoized(() {
       getData();
-      return null;
     });
 
     return Scaffold(
@@ -78,7 +81,7 @@ class HomeScreen extends HookConsumerWidget {
                             borderRadius: BorderRadius.circular(50),
                             onTap: () {
                               Get.to(
-                                () => const NotificationScreen(),
+                                () => const CartScreen(),
                                 transition: Transition.fadeIn,
                                 duration: const Duration(milliseconds: 500),
                               );
@@ -187,7 +190,7 @@ class HomeScreen extends HookConsumerWidget {
                 ),
                 GridView.builder(
                   shrinkWrap: true,
-                  itemCount: newJobs.value.length,
+                  itemCount: fetchingData.value ? 3 : newJobs.value.length,
                   padding: EdgeInsets.zero,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -197,8 +200,21 @@ class HomeScreen extends HookConsumerWidget {
                     childAspectRatio: 0.9,
                   ),
                   itemBuilder: (context, index) {
+                    if (fetchingData.value) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade200,
+                        highlightColor: Colors.grey.shade100,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xfffff2d8),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
                     final item = newJobs.value[index];
                     return Container(
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: const Color(0xfffff2d8),
                         borderRadius: BorderRadius.circular(10),
@@ -214,48 +230,94 @@ class HomeScreen extends HookConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (item.departments?.first.departmentId?.image != null) ...[
-                            Image.network(
-                              item.departments!.first.departmentId!.image!,
-                              height: 70,
-                              width: 70,
-                            ),
-                          ],
-                          SizedBox(height: 20),
-                          // if (item["title"] != null)
-                          //   Text(
-                          //     item["title"]!,
-                          //     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey),
-                          //     textAlign: TextAlign.center,
-                          //   ),
-                          // SizedBox(height: 10.h),
-                          // if (item["price"] != null)
-                          //   Text(
-                          //     "\$${item["price"]}",
-                          //     style: const TextStyle(
-                          //       fontSize: 18,
-                          //       fontWeight: FontWeight.bold,
-                          //       color: Color(0xff384F6C),
-                          //     ),
-                          //   ),
-                          // SizedBox(height: 10.h),
-                          // if (item["subtitle"] != null)
-                          //   Text(
-                          //     item["subtitle"]!,
-                          //     style: const TextStyle(
-                          //       fontSize: 14,
-                          //       color: Color(0xff595959B2),
-                          //     ),
-                          //     textAlign: TextAlign.center,
-                          //   ),
+                          const Spacer(),
+                          CachedNetworkImage(
+                            imageUrl: item.departments?.first.departmentId?.image! ?? "",
+                            imageBuilder: (context, imageProvider) {
+                              return Container(
+                                width: 70,
+                                height: 70,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(fit: BoxFit.cover, image: imageProvider),
+                                ),
+                              );
+                            },
+                            errorWidget: (context, url, error) {
+                              return Container(
+                                width: 70,
+                                height: 70,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_rounded,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              );
+                            },
+                            placeholder: (context, url) {
+                              return Container(
+                                width: 70,
+                                height: 70,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.image_rounded,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const Spacer(),
+                          const Text(
+                            "Job ID",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black45),
+                          ),
+                          Text(
+                            item.orderId ?? "-",
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item.allBookingId?.mobility?.join(", ") ?? "-",
+                            textAlign: TextAlign.justify,
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Text(
+                                "End Date",
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black87),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  item.toTime == null ? "--/--/--" : DateFormat("dd/MM/yyyy").format(item.toTime!),
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black87),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     );
                   },
                 ),
-                SizedBox(
-                  height: Get.height * 0.1,
-                ),
+                SizedBox(height: Get.height * 0.1),
               ],
             ),
           ),
@@ -275,12 +337,16 @@ class CustomCarousel extends HookConsumerWidget {
     final authProvider = ref.read(authController.notifier);
 
     final banners = useState<List<BannerDataModel>>([]);
+    final fetchingData = useState<bool>(false);
 
     Future<void> getData() async {
       try {
+        fetchingData.value = true;
         banners.value = await authProvider.getAllBanners();
       } catch (e) {
         NotifyToast.showError(context, e.toString());
+      } finally {
+        fetchingData.value = false;
       }
     }
 
@@ -288,30 +354,76 @@ class CustomCarousel extends HookConsumerWidget {
       getData();
       return null;
     }, []);
-    return CarouselSlider(
-      items: banners.value.map((item) {
-        if (item.bannerImage != null) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: Image.network(item.bannerImage!).image,
+
+    return fetchingData.value
+        ? Shimmer.fromColors(
+            baseColor: Colors.grey.shade200,
+            highlightColor: Colors.grey.shade100,
+            child: Container(
+              height: 160,
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
+          )
+        : CarouselSlider(
+            items: banners.value.map((item) {
+              return CachedNetworkImage(
+                imageUrl: item.bannerImage ?? "",
+                imageBuilder: (context, imageProvider) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(fit: BoxFit.cover, image: imageProvider),
+                    ),
+                  );
+                },
+                errorWidget: (context, url, error) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade300,
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_rounded,
+                        color: Colors.red,
+                      ),
+                    ),
+                  );
+                },
+                placeholder: (context, url) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade300,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.image_rounded,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+            options: CarouselOptions(
+              height: 160,
+              autoPlayAnimationDuration: const Duration(milliseconds: 500),
+              autoPlay: true,
+              scrollDirection: Axis.horizontal,
+              viewportFraction: 1,
+            ),
           );
-        }
-        return const SizedBox.shrink();
-      }).toList(),
-      options: CarouselOptions(
-        height: 160,
-        autoPlayAnimationDuration: const Duration(milliseconds: 500),
-        autoPlay: true,
-        scrollDirection: Axis.horizontal,
-        viewportFraction: 1,
-      ),
-    );
   }
 }

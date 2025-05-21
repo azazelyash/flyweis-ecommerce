@@ -14,10 +14,10 @@ class BottomNavbaar extends StatefulWidget {
 class _BottomNavbaarState extends State<BottomNavbaar> {
   int screenIndex = 0;
   final List<Widget> _screen = [
-    HomeScreen(),
-    MissionScreen(),
-    TicketingScreen(),
-    ProfileScreen(),
+    const HomeScreen(),
+    const MissionScreen(),
+    const TicketingScreen(),
+    const ProfileScreen(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -45,52 +45,61 @@ class _BottomNavbaarState extends State<BottomNavbaar> {
             elevation: 2,
             items: [
               BottomNavigationBarItem(
-                  icon: Image.asset(
-                    "assets/images/home_icon.png",
-                    height: 30,
-                    width: 30,
-                    color: Colors.grey,
-                  ),
-                  label: "Home",
-                  activeIcon: const Icon(
-                    Icons.home,
-                    size: 45,
-                    color: Color(0xffF5A302),
-                  )),
+                icon: Image.asset(
+                  "assets/images/home_icon.png",
+                  height: 24,
+                  width: 24,
+                  color: Colors.grey,
+                ),
+                label: "Home",
+                activeIcon: const Icon(
+                  Icons.home,
+                  size: 32,
+                  color: Color(0xffF5A302),
+                ),
+              ),
               BottomNavigationBarItem(
                 icon: Image.asset(
                   "assets/images/office.png",
-                  height: 30,
-                  width: 30,
+                  height: 24,
+                  width: 24,
                   color: Colors.grey,
                 ),
                 label: "Mission",
                 activeIcon: Image.asset(
                   "assets/images/office1.png",
-                  height: 55,
-                  width: 55,
+                  height: 32,
+                  width: 32,
                   color: const Color(0xffF5A302),
                 ),
               ),
               BottomNavigationBarItem(
-                icon: Image.asset("assets/images/chat.png",
-                    height: 35, width: 35, color: Colors.grey),
+                icon: Image.asset(
+                  "assets/images/chat.png",
+                  height: 24,
+                  width: 24,
+                  color: Colors.grey,
+                ),
                 label: "Ticketing",
                 activeIcon: Image.asset(
                   "assets/images/chat1.png",
-                  height: 55,
-                  width: 55,
+                  height: 32,
+                  width: 32,
                   color: const Color(0xffF5A302),
                 ),
               ),
               BottomNavigationBarItem(
-                icon: Image.asset("assets/images/profile.png",
-                    height: 35, width: 35, color: Colors.grey),
+                icon: Image.asset(
+                  "assets/images/profile.png",
+                  height: 24,
+                  width: 24,
+                  color: Colors.grey,
+                ),
                 label: "profile",
                 activeIcon: Image.asset(
                   "assets/images/profile1.png",
-                  height: 55,
-                  width: 55,
+                  height: 32,
+                  width: 32,
                   color: const Color(0xffF5A302),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mr_pritam_client_app/models/banner_data_model.dart';
 import 'package:mr_pritam_client_app/models/job_data_model.dart';
 import 'package:mr_pritam_client_app/models/login_response_model.dart';
+import 'package:mr_pritam_client_app/models/notification_model.dart';
 import 'package:mr_pritam_client_app/repositories/repository.dart';
 
 class AuthController extends StateNotifier<void> {
@@ -36,9 +37,18 @@ class AuthController extends StateNotifier<void> {
       rethrow;
     }
   }
+
+  Future<List<NotificationModel>> getAllNotifications() async {
+    try {
+      final data = await repository.getAllNotifications();
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
-final authController = StateNotifierProvider.autoDispose(
+final authController = StateNotifierProvider<AuthController, void>(
   (ref) => AuthController(
     repository: ref.read(repositoryProvider),
   ),

@@ -9,4 +9,5 @@ class ApiConstants {
   static const String staffLogin = "$baseUrl/staff/login";
   static const String getNewJobsList = "$baseUrl/Staff/getAllNewJob";
   static const String getAllBanner = "$baseUrl/Staff/getAllBanner";
+  static const String allNotification = "$baseUrl/staff/allNotification";
 }
